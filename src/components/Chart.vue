@@ -15,12 +15,7 @@
           labels: ['2016', '2017', '2018', 'Projected 2019'],
           datasets: [
             {
-              label: 'Total Profits',
-              backgroundColor: '#A3E882',
-              data: [this.totalProfits.total2016, this.totalProfits.total2017, this.totalProfits.total2018, this.totalProfits.total2019]
-            },
-            {
-              label: 'U/W Profit (Loss)',
+              label: 'Underwriting Profit (Loss)',
               backgroundColor: '#9CFBFF',
               data: [this.totalUWProfitLoss.total2016, this.totalUWProfitLoss.total2017, this.totalUWProfitLoss.total2018, this.totalUWProfitLoss.total2019]
             },
