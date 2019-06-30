@@ -2,6 +2,10 @@
   <div>
     <div class="calculator">
       <form v-on:submit.prevent="calculateSavings">
+        <div class="form-header">
+          <h2>Expected Savings Calculator</h2>
+          <p>Enter your company(s) current annual insurance carrier premium spend for each of the P&C lines of business provided below to calculate the potential savings with a captive solution. Note the projected savings is based on a combination of aggregated statutory financial statement data for insurance carriers and Spring's experience with these lines of business in captive insurance companies.</p>
+        </div>
         <div>
           <label for="commercialAutoLiability">Commercial Auto Liability:</label>
           <input required type="number" v-model="commercialAutoLiability.formInput" @change="handleCommercialAutoLiability(commercialAutoLiability.formInput)" name="commercialAutoLiability" placeholder="Enter Cost ($)">
@@ -32,16 +36,16 @@
       <h3 class="center">Expected Savings with a Captive - Projected and Last 3 Years
         (as a % of Your Current Commercial Insurance Carrier Premiums)</h3>
       <div>
-        <Chart :totalProfits="this.totalProfits" :totalExpenseDifferences="this.totalExpenseDifferences" :totalUWProfitLoss="this.totalUWProfitLoss" :totalIncomeOnInsTransaction="this.totalIncomeOnInsTransaction"/>
+        <Chart :chart-data="this.chartData"/>
       </div>
       <div class="breakdown">
-        <h3 class="">{{this.totalProfits.total2019}}% in projected annual premium savings comes from three key sources:</span></h3>
+        <h3 class="total-savings">Projected savings for 2019 based on inputted carrier premiums: <span>${{this.projectedSavings2019}}</span></h3>
+        <h4 class="">{{this.totalProfits.total2019}}% in projected annual premium savings for 2019 comes from three key sources:</h4>
         <ul>
           <li>{{this.totalExpenseDifferences.total2019}}% is from the captive's expected lower operating costs compared to commercial carriers</li>
           <li>{{this.totalIncomeOnInsTransaction.total2019}}% is from retained investment income on reserve balances used to pay future paid losses</li>
           <li>{{this.totalUWProfitLoss.total2019}}% in underwriting income (losses shown as a negative value) retained by the captive</li>
         </ul>
-        <h3 class="total-savings">Projected savings for 2019 based on inputted carrier premiums: <span>${{this.projectedSavings2019}}</span></h3>
         <p class="notes">Note these projections are based on assumptions established by our internal actuarial team using a combination of aggregated statutory financial statement loss and expense data from S&P Global and Spring's captive experience. Potential savings may be more or less based differing assumptions such as the use of a front/reinsurance. This assumes the following captive retained risk percentages: Commercial Auto Liability: {{convertToPercentage(commercialAutoLiability.captiveRetainedRiskPercentage)}}; Other Liability (Claims-Made): {{convertToPercentage(otherLiability.captiveRetainedRiskPercentage)}}; Commercial Property: {{convertToPercentage(commercialProperty.captiveRetainedRiskPercentage)}}; Workers' Compensation: {{convertToPercentage(workersComp.captiveRetainedRiskPercentage)}}; Other Coverages: {{convertToPercentage(otherCoverages.captiveRetainedRiskPercentage)}}</p>
       </div>
     </div>
@@ -58,6 +62,7 @@ export default {
   },
   data () {
     return {
+      chartData:Object,
       showResults:false,
       commercialAutoLiability:{
         formInput:undefined,
@@ -246,6 +251,7 @@ export default {
       this.calculateTotalUWProfitLoss()
       this.calculateTotalExpenseDifferences()
       this.calculateTotalProfits()
+      this.fillData()
     },
     convertToPercentage: function (decimal){
       return decimal*100+"%"
@@ -418,6 +424,28 @@ export default {
       this.projectedSavings2019 = (this.totalInsuredsPremium * (this.totalProfits.total2019/100)).toFixed(0)
 
       console.log("this.projectedSavings2019: "+this.projectedSavings2019)
+    },
+    fillData () {
+      this.chartData = {
+        labels: ['2016', '2017', '2018', 'Projected 2019'],
+        datasets: [
+          {
+            label: 'Underwriting Profit (Loss)',
+            backgroundColor: '#9CFBFF',
+            data: [this.totalUWProfitLoss.total2016, this.totalUWProfitLoss.total2017, this.totalUWProfitLoss.total2018, this.totalUWProfitLoss.total2019]
+          },
+          {
+            label: 'Expense Differences (Including Unallocated Loss Adj Expenses)',
+            backgroundColor: '#FF8F97',
+            data: [this.totalExpenseDifferences.total2016, this.totalExpenseDifferences.total2017, this.totalExpenseDifferences.total2018, this.totalExpenseDifferences.total2019]
+          },
+          {
+            label: 'Investment Income On Ins. Transaction',
+            backgroundColor: '#FFE291',
+            data:[this.totalIncomeOnInsTransaction.total2016,this.totalIncomeOnInsTransaction.total2017,this.totalIncomeOnInsTransaction.total2018,this.totalIncomeOnInsTransaction.total2019]
+          }
+        ]
+      }
     }
   }
 }
@@ -433,14 +461,16 @@ export default {
     border-radius: 5px;
     form{
       div{
-        margin-bottom:10px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
+        &:not(:first-child){
+          margin-bottom:10px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+        }
         label{
           font-size: 12px;
           text-transform: uppercase;
-          color:#777;
+          color:#999;
         }
         input{
           -webkit-appearance: none;
@@ -467,6 +497,19 @@ export default {
           cursor:pointer;
         }
       }
+      .form-header{
+        h2{
+          width:100%;
+          text-align: center;
+          margin:0 0 15px;
+        }
+        p{
+          font-size: 12px;
+          font-style: italic;
+          color:#777;
+          margin:0 0 20px;
+        }
+      }
     }
   }
   .results{
@@ -476,8 +519,15 @@ export default {
     width:850px;
     margin:0 auto;
     .total-savings{
+      text-align: center;
+      margin-bottom: 30px;
       span{
         color: #85bb65;
+      }
+    }
+    .breakdown{
+      ul{
+        padding-left: 20px;
       }
     }
     .notes{
