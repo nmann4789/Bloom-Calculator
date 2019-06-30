@@ -1,9 +1,9 @@
 <template>
   <div>
     <div class="calculator">
-      <form v-on:submit.prevent="calculateSavings">
+      <form accept-charset="UTF-8" method="post" action="http://ww2.springgroup.com/l/147001/2019-06-18/5k9xbn" class="form" id="pardot-form">
         <div class="form-header">
-          <h2>Expected Savings Calculator</h2>
+          <h2>How Much Can You Save With Bloom? </h2>
           <p>Enter your company(s) current annual insurance carrier premium spend for each of the P&C lines of business provided below to calculate the potential savings with a captive solution. Note the projected savings is based on a combination of aggregated statutory financial statement data for insurance carriers and Spring's experience with these lines of business in captive insurance companies.</p>
         </div>
         <div>
@@ -27,8 +27,31 @@
           <input required type="number" v-model="otherCoverages.formInput" @change="handleOtherCoverages(otherCoverages.formInput)" name="otherCoverages" placeholder="Enter Cost ($)">
         </div>
         <div>
+          <hr/>
+        </div>
+        <div class="form-field  first_name pd-text required    ">
+          <label class="field-label" for="147001_87423pi_147001_87423">First Name</label>
+          <input type="text" name="147001_87423pi_147001_87423" id="147001_87423pi_147001_87423" value="" class="text" size="30" maxlength="40" onchange="">
+        </div>
+        <div class="form-field  last_name pd-text required    ">
+          <label class="field-label" for="147001_87425pi_147001_87425">Last Name</label>
+          <input type="text" name="147001_87425pi_147001_87425" id="147001_87425pi_147001_87425" value="" class="text" size="30" maxlength="80" onchange="">
+        </div>
+        <div class="form-field  company pd-text required    ">
+          <label class="field-label" for="147001_87427pi_147001_87427">Company</label>
+          <input type="text" name="147001_87427pi_147001_87427" id="147001_87427pi_147001_87427" value="" class="text" size="30" maxlength="255" onchange="">
+        </div>
+        <div class="form-field  email pd-text">
+          <label class="field-label" for="147001_87429pi_147001_87429">Email</label>
+          <input type="text" name="147001_87429pi_147001_87429" id="147001_87429pi_147001_87429" value="" class="text" size="30" maxlength="255" required>
+        </div>
+        <div class=" ">
+          <label class="field-label" for="147001_87431pi_147001_87431">Job Title</label>
+          <input type="text" name="147001_87431pi_147001_87431" id="147001_87431pi_147001_87431" value="" class="text" size="30" maxlength="128" onchange="" required>
+        </div>
+        <div>
           <label></label>
-          <input type="submit" class="submit" value="Calculate"/>
+          <input type="submit" accesskey="s" class="submit" value="Calculate"/>
         </div>
       </form>
     </div>
