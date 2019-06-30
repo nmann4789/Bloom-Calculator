@@ -47,6 +47,7 @@
           <li>{{this.totalUWProfitLoss.total2019}}% in underwriting income (losses shown as a negative value) retained by the captive</li>
         </ul>
         <p class="notes">Note these projections are based on assumptions established by our internal actuarial team using a combination of aggregated statutory financial statement loss and expense data from S&P Global and Spring's captive experience. Potential savings may be more or less based differing assumptions such as the use of a front/reinsurance. This assumes the following captive retained risk percentages: Commercial Auto Liability: {{convertToPercentage(commercialAutoLiability.captiveRetainedRiskPercentage)}}; Other Liability (Claims-Made): {{convertToPercentage(otherLiability.captiveRetainedRiskPercentage)}}; Commercial Property: {{convertToPercentage(commercialProperty.captiveRetainedRiskPercentage)}}; Workers' Compensation: {{convertToPercentage(workersComp.captiveRetainedRiskPercentage)}}; Other Coverages: {{convertToPercentage(otherCoverages.captiveRetainedRiskPercentage)}}</p>
+        <p>Share these results by copying the following link:<a href="/calculator?cal="commercialAutoLiability.formInput></a></p>
       </div>
     </div>
   </div>
@@ -62,6 +63,7 @@ export default {
   },
   data () {
     return {
+      bPreviousResults:true,
       chartData:Object,
       showResults:false,
       commercialAutoLiability:{
@@ -234,24 +236,62 @@ export default {
         total2018:0,
         total2019:0,
       },
-      projectedSavings2019:0
+      projectedSavings2019:0,
+      shareLink:''
     }
   },
   created () {
 
   },
   mounted () {
+    this.checkForExistingResults()
     this.setTotalProfits()
+    if(this.bPreviousResults){
+      this.calculateSavings()
+    }
   },
   methods: {
+    getParameterByName: function (name) {
+      name = name.replace(/[[]/, '\\[').replace(/[\]]/, '\\]')
+      let regex = new RegExp('[\\?&]' + name + '=([^&#]*)')
+      let results = regex.exec(window.location.search)
+      if(results == null){
+        console.log("setting share link to false")
+        this.bPreviousResults = false
+      }
+      return (results === null) ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '))
+    },
+    checkForExistingResults : function (){
+      console.log("checking for existing results")
+      this.commercialAutoLiability.formInput = parseInt(this.getParameterByName('cal'))
+      this.otherLiability.formInput = parseInt(this.getParameterByName('ol'))
+      this.commercialProperty.formInput = parseInt(this.getParameterByName('cp'))
+      this.workersComp.formInput = parseInt(this.getParameterByName('wc'))
+      this.otherCoverages.formInput = parseInt(this.getParameterByName('oc'))
+      if(this.bPreviousResults){
+        this.handleCommercialAutoLiability (this.commercialAutoLiability.formInput)
+        this.handleOtherLiability(this.otherLiability.formInput)
+        this.handleWorkersComp(this.workersComp.formInput)
+        this.handleCommercialProperty(this.commercialProperty.formInput)
+        this.handleOtherCoverages(this.otherCoverages.formInput)
+      }else{
+        console.log("new calculator")
+      }
+    },
+    setShareLink: function () {
+      this.shareLink =  "/calculator?cal="+this.commercialAutoLiability.formInput+"&ol="+this.otherLiability.formInput+"&cp="+this.commercialProperty.formInput+"&wc="+this.workersComp.formInput+"&oc="+this.otherCoverages.formInput
+      console.log(this.shareLink)
+    },
     calculateSavings: function (event){
       this.totalInsuredsPremium = this.commercialAutoLiability.formInput + this.otherLiability.formInput + this.workersComp.formInput + this.commercialProperty.formInput + this.otherCoverages.formInput
+      console.log(" this.totalInsuredsPremium: "+this.totalInsuredsPremium)
       this.showResults = true
       this.calculateTotalIncomeOnInsTransaction()
       this.calculateTotalUWProfitLoss()
       this.calculateTotalExpenseDifferences()
       this.calculateTotalProfits()
-      this.fillData()
+      this.fillDataForChart()
+      this.setShareLink()
     },
     convertToPercentage: function (decimal){
       return decimal*100+"%"
@@ -277,6 +317,7 @@ export default {
       this.otherCoverages.netCaptivePremium = parseInt(input) * this.otherCoverages.captiveRetainedRiskPercentage
     },
     setTotalProfits: function () {
+      console.log("setting total profits")
       this.commercialAutoLiability.totalProfits['2016'] = this.commercialAutoLiability.incomeOnInsTransaction['2016'] + this.commercialAutoLiability.uWProfitLoss['2016'] + this.commercialAutoLiability.expenseDifferences['2016']
       this.otherLiability.totalProfits['2016'] = this.otherLiability.incomeOnInsTransaction['2016'] + this.otherLiability.uWProfitLoss['2016'] + this.otherLiability.expenseDifferences['2016']
       this.workersComp.totalProfits['2016'] = this.workersComp.incomeOnInsTransaction['2016'] + this.workersComp.uWProfitLoss['2016'] + this.workersComp.expenseDifferences['2016']
@@ -425,7 +466,7 @@ export default {
 
       console.log("this.projectedSavings2019: "+this.projectedSavings2019)
     },
-    fillData () {
+    fillDataForChart () {
       this.chartData = {
         labels: ['2016', '2017', '2018', 'Projected 2019'],
         datasets: [
