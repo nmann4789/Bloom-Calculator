@@ -1,11 +1,11 @@
 <template>
   <div>
     <div class="calculator">
-      <form accept-charset="UTF-8" method="post" action="http://ww2.springgroup.com/l/147001/2019-06-18/5k9xbn" class="form" id="pardot-form">
-        <div class="form-header">
-          <h2>How Much Can You Save With Bloom? </h2>
-          <p>Enter your company(s) current annual insurance carrier premium spend for each of the P&C lines of business provided below to calculate the potential savings with a captive solution. Note the projected savings is based on a combination of aggregated statutory financial statement data for insurance carriers and Spring's experience with these lines of business in captive insurance companies.</p>
-        </div>
+      <div class="form-header">
+        <h2>How Much Can You Save With Bloom? </h2>
+        <p>Enter your company(s) current annual insurance carrier premium spend for each of the P&C lines of business provided below to calculate the potential savings with a captive solution. Note the projected savings is based on a combination of aggregated statutory financial statement data for insurance carriers and Spring's experience with these lines of business in captive insurance companies.</p>
+      </div>
+      <form v-on:submit.prevent="handleInputsNext" id="calculator-form" v-bind:class="{ 'hidden': !bShowInputs }">
         <div>
           <label for="commercialAutoLiability">Commercial Auto Liability:</label>
           <input required type="number" v-model="commercialAutoLiability.formInput" @change="handleCommercialAutoLiability(commercialAutoLiability.formInput)" name="commercialAutoLiability" placeholder="Enter Cost ($)">
@@ -27,8 +27,11 @@
           <input required type="number" v-model="otherCoverages.formInput" @change="handleOtherCoverages(otherCoverages.formInput)" name="otherCoverages" placeholder="Enter Cost ($)">
         </div>
         <div>
-          <hr/>
+          <label></label>
+          <input type="submit" class="submit" :value="bPardotSubmitted ? 'Calculate' : 'Next' "/>
         </div>
+      </form>
+      <form accept-charset="UTF-8" method="post" action="http://ww2.springgroup.com/l/147001/2019-06-18/5k9xbn" class="form" id="pardot-form" v-on:submit.prevent="calculateSavings" v-bind:class="{ 'hidden': bShowInputs }">
         <div class="form-field  first_name pd-text required    ">
           <label class="field-label" for="147001_87423pi_147001_87423">First Name</label>
           <input type="text" name="147001_87423pi_147001_87423" id="147001_87423pi_147001_87423" value="" class="text" size="30" maxlength="40" onchange="">
@@ -50,7 +53,7 @@
           <input type="text" name="147001_87431pi_147001_87431" id="147001_87431pi_147001_87431" value="" class="text" size="30" maxlength="128" onchange="" required>
         </div>
         <div>
-          <label></label>
+          <label v-on:click="showInputs" style="text-transform: none; cursor:pointer">Back</label>
           <input type="submit" accesskey="s" class="submit" value="Calculate"/>
         </div>
       </form>
@@ -78,6 +81,8 @@
 <script>
 
 import Chart from './Chart'
+import JQuery from 'jquery'
+let $ = JQuery
 
 export default {
   name: 'Calculator',
@@ -89,6 +94,8 @@ export default {
       bPreviousResults:true,
       chartData:Object,
       showResults:false,
+      bShowInputs:true,
+      bPardotSubmitted:false,
       commercialAutoLiability:{
         formInput:undefined,
         captiveRetainedRiskPercentage:0.75,
@@ -305,7 +312,25 @@ export default {
       this.shareLink =  "/calculator?cal="+this.commercialAutoLiability.formInput+"&ol="+this.otherLiability.formInput+"&cp="+this.commercialProperty.formInput+"&wc="+this.workersComp.formInput+"&oc="+this.otherCoverages.formInput
       console.log(this.shareLink)
     },
+    handleInputsNext () {
+      if(this.bPardotSubmitted){
+        this.calculateSavings()
+      }else{
+        this.showPardotForm()
+      }
+    },
+    showPardotForm () {
+      this.bShowInputs = false
+    },
     calculateSavings: function (event){
+      let form = $('#pardot-form')
+      $.ajax({
+        url: form.attr('action'),
+        method: 'POST',
+        data: form.serialize(),
+        crossDomain : true,
+        dataType:'jsonp'
+      })
       this.totalInsuredsPremium = this.commercialAutoLiability.formInput + this.otherLiability.formInput + this.workersComp.formInput + this.commercialProperty.formInput + this.otherCoverages.formInput
       console.log(" this.totalInsuredsPremium: "+this.totalInsuredsPremium)
       this.showResults = true
@@ -315,6 +340,7 @@ export default {
       this.calculateTotalProfits()
       this.fillDataForChart()
       this.setShareLink()
+      this.bPardotSubmitted = true
     },
     convertToPercentage: function (decimal){
       return decimal*100+"%"
@@ -510,6 +536,9 @@ export default {
           }
         ]
       }
+    },
+    showInputs () {
+      this.bShowInputs = true
     }
   }
 }
@@ -523,14 +552,36 @@ export default {
     padding:30px;
     border:1px solid #efefef;
     border-radius: 5px;
+    position: relative;
+    overflow: hidden;
     form{
-      div{
-        &:not(:first-child){
-          margin-bottom:10px;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
+      transition: 1s all;
+      &#pardot-form{
+        position: absolute;
+        left:30px;
+        width:calc(100% - 60px);
+        top:163px;
+        opacity: 1;
+        &.hidden{
+          left: 100% !important;
+          opacity: 0;
         }
+      }
+      &#calculator-form{
+        transition:1s all;
+        position: relative;
+        left:0;
+        opacity: 1;
+        &.hidden{
+          left:-560px;
+          opacity: 0;
+        }
+      }
+      div{
+        margin-bottom:10px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
         label{
           font-size: 12px;
           text-transform: uppercase;
@@ -561,18 +612,18 @@ export default {
           cursor:pointer;
         }
       }
-      .form-header{
-        h2{
-          width:100%;
-          text-align: center;
-          margin:0 0 15px;
-        }
-        p{
-          font-size: 12px;
-          font-style: italic;
-          color:#777;
-          margin:0 0 20px;
-        }
+    }
+    .form-header{
+      h2{
+        width:100%;
+        text-align: center;
+        margin:0 0 15px;
+      }
+      p{
+        font-size: 12px;
+        font-style: italic;
+        color:#777;
+        margin:0 0 20px;
       }
     }
   }
