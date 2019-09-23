@@ -286,13 +286,11 @@ export default {
       let regex = new RegExp('[\\?&]' + name + '=([^&#]*)')
       let results = regex.exec(window.location.search)
       if(results == null){
-        console.log("setting share link to false")
         this.bPreviousResults = false
       }
       return (results === null) ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '))
     },
     checkForExistingResults : function (){
-      console.log("checking for existing results")
       this.commercialAutoLiability.formInput = parseInt(this.getParameterByName('cal'))
       this.otherLiability.formInput = parseInt(this.getParameterByName('ol'))
       this.commercialProperty.formInput = parseInt(this.getParameterByName('cp'))
@@ -305,7 +303,6 @@ export default {
         this.handleCommercialProperty(this.commercialProperty.formInput)
         this.handleOtherCoverages(this.otherCoverages.formInput)
       }else{
-        console.log("new calculator")
       }
     },
     setShareLink: function () {
@@ -554,6 +551,7 @@ export default {
     border-radius: 5px;
     position: relative;
     overflow: hidden;
+    background-color: #fff;
     form{
       transition: 1s all;
       &#pardot-form{
@@ -633,6 +631,7 @@ export default {
     padding:20px;
     width:850px;
     margin:0 auto;
+    background-color: #fff;
     .total-savings{
       text-align: center;
       margin-bottom: 30px;
